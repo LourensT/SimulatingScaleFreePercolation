@@ -12,8 +12,6 @@ import tikzplotlib as plt2tikz
 class SimulatingScaleFreePercolation:
 
     def __init__(self):
-        #bulkwise sampler is quicker then sampling one by one
-        #self.poissonSampler = Distribution(stats.poisson(poisson_mean)) 
         self.unifSampler = Distribution(stats.uniform())
         self.dir = ""
 
@@ -142,7 +140,7 @@ class SimulatingScaleFreePercolation:
     fp: filepath to save file to
     show: whether to display the plot on screen
     '''
-    def saveDegreeDistribution(self, fp, show=False):
+    def saveDegreeDistribution(self, fp, show=False, dump=True):
         print("Saving: " + fp)
         assert ".tikz" in fp, "filepath does not end in .tikz"
 
@@ -152,7 +150,9 @@ class SimulatingScaleFreePercolation:
         cumulative = [sum(degrees[n::])/total for n in range(len(degrees))]
         
         plt.loglog(degrees, cumulative)
-        plt2tikz.save(self.dir+fp) #output
+
+        if dump:
+            plt2tikz.save(self.dir+fp) #output
 
         if show:
             plt.show()
@@ -175,6 +175,12 @@ class Vertex:
         return self.weight
 
 if __name__ == "__main__":
+    style = ["\SetVertexStyle[MinSize=0.1\DefaultUnit, LineWidth=0pt, FillColor=mycolor1]\n", "\SetEdgeStyle[LineWidth=0.25pt]\n"]
     sim = SimulatingScaleFreePercolation()
+    sim.setOutputFolder(os.getcwd()+"//BATCH_1//")
     sim.generateGraph(25, 25, 0.625, 2.5, 3)
-    sim.draw(show=True, dump=False)
+    sim.draw(fp="tau2,5.tikz", style=style)
+    sim.saveDegreeDistribution("tau2,5_degreedistr.tikz")
+    sim.generateGraph(25, 25, 0.625, 3.5, 3)
+    sim.draw(fp="tau3,5.tikz", style=style)
+    sim.saveDegreeDistribution("tau3,5_degreedistr.tikz")
