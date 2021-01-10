@@ -52,7 +52,6 @@ class SimulatingScaleFreePercolation:
     sample a single weight (according to powerlaw distribution)
     '''
     def sampleWeight(self):
-        print(self.lam *((self.unifSampler.rvs())**(-1/(self.tau -1))))
         return self.lam *((self.unifSampler.rvs())**(-1/(self.tau -1)))
             
     '''
@@ -148,8 +147,16 @@ class SimulatingScaleFreePercolation:
         degrees.sort()
         total = sum(degrees)
         cumulative = [sum(degrees[n::])/total for n in range(len(degrees))]
-        
-        plt.loglog(degrees, cumulative)
+        prev = degrees[0]
+        index = [prev]
+        freq = [cumulative[0]]
+        for i in range(1, len(degrees)):
+            if not (degrees[i] == prev):
+                prev = degrees[i]
+                index.append(degrees[i])
+                freq.append(cumulative[i])
+                
+        plt.loglog(index, freq)
 
         if dump:
             plt2tikz.save(self.dir+fp) #output
@@ -173,14 +180,3 @@ class Vertex:
     def getWeight():
         assert self.weight >= 0, "weight not yet set"
         return self.weight
-
-if __name__ == "__main__":
-    style = ["\SetVertexStyle[MinSize=0.1\DefaultUnit, LineWidth=0pt, FillColor=mycolor1]\n", "\SetEdgeStyle[LineWidth=0.25pt]\n"]
-    sim = SimulatingScaleFreePercolation()
-    sim.setOutputFolder(os.getcwd()+"//BATCH_1//")
-    sim.generateGraph(25, 25, 0.625, 2.5, 3)
-    sim.draw(fp="tau2,5.tikz", style=style)
-    sim.saveDegreeDistribution("tau2,5_degreedistr.tikz")
-    sim.generateGraph(25, 25, 0.625, 3.5, 3)
-    sim.draw(fp="tau3,5.tikz", style=style)
-    sim.saveDegreeDistribution("tau3,5_degreedistr.tikz")
